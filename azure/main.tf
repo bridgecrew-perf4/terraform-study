@@ -102,6 +102,20 @@ resource "azurerm_network_interface" "nic1_lin01" {
   }
 }
 
+resource "azurerm_network_interface" "nic1_win01" {
+  name                = "nic1_win01"
+  location            = azurerm_resource_group.rg_kattest.location
+  resource_group_name = azurerm_resource_group.rg_kattest.name
+
+  ip_configuration {
+    name                          = "nic1_win01_ipaddr"
+    subnet_id                     = azurerm_subnet.subnet_mgmt.id
+    private_ip_address_allocation = "Static"
+    private_ip_address            = "192.168.214.11"
+    public_ip_address_id          = azurerm_public_ip.gip2.id
+  }
+}
+
 ############################
 #    App Subnet
 ############################
@@ -119,8 +133,10 @@ resource "azurerm_subnet" "subnet_app" {
 ############################
 
 # Linux VM
+#  TODO - azurerm_linux_virtual_machine 使う
+#  https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/linux_virtual_machine
 resource "azurerm_virtual_machine" "vm_lin01" {
-  name                  = "vm_lin01"
+  name                  = "vm-lin01"
   location              = azurerm_resource_group.rg_kattest.location
   resource_group_name   = azurerm_resource_group.rg_kattest.name
   network_interface_ids = [azurerm_network_interface.nic1_lin01.id]
@@ -157,6 +173,27 @@ resource "azurerm_virtual_machine" "vm_lin01" {
   }
 }
 
+
 # Win VM
-#resource "azurerm_virtual_machine" "vm_win01" {
-#}
+resource "azurerm_windows_virtual_machine" "vm_win01" {
+  name                = "vm-win01"
+  computer_name       = "win01"
+  location            = azurerm_resource_group.rg_kattest.location
+  resource_group_name = azurerm_resource_group.rg_kattest.name
+  size                = "Standard_F2"
+  admin_username      = "kattest"
+  admin_password      = "kattest1234!"
+  network_interface_ids = [azurerm_network_interface.nic1_win01.id]
+
+  os_disk {
+    caching              = "ReadWrite"
+    storage_account_type = "Standard_LRS"
+  }
+
+  source_image_reference {
+    publisher = "MicrosoftWindowsServer"
+    offer     = "WindowsServer"
+    sku       = "2019-Datacenter"
+    version   = "latest"
+  }
+}
