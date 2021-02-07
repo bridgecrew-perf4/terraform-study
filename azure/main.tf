@@ -175,14 +175,22 @@ resource "azurerm_virtual_machine" "vm_lin01" {
 
 
 # Win VM
+variable "winvm_admin_username" {
+  description = "Wondows admin user name."
+}
+
+variable "winvm_admin_password" {
+  description = "Windows admin user's password."
+}
+
 resource "azurerm_windows_virtual_machine" "vm_win01" {
   name                = "vm-win01"
   computer_name       = "win01"
   location            = azurerm_resource_group.rg_kattest.location
   resource_group_name = azurerm_resource_group.rg_kattest.name
   size                = "Standard_F2"
-  admin_username      = "kattest"
-  admin_password      = "kattest1234!"
+  admin_username      = var.winvm_admin_username
+  admin_password      = var.winvm_admin_password
   network_interface_ids = [azurerm_network_interface.nic1_win01.id]
 
   os_disk {

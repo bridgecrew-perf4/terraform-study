@@ -77,10 +77,14 @@ resource "aws_security_group" "sg_mgmt" {
 ############################
 #    EC2
 ############################
+
+variable "public_key_path" {
+  description = "SSH pubkey path."
+}
 # key pair
 resource "aws_key_pair" "key_kattest" {
   key_name   = "kattest"
-  public_key = file("/Users/kenichi/.ssh/id_rsa.pub")
+  public_key = file(var.public_key_path)
 }
 # EC2
 resource "aws_instance" "sandbox_lin01" {
